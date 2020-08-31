@@ -13,6 +13,8 @@ var ip = req.headers['x-forwarded-for'] ||
         req.socket.remoteAddress ||
         req.connection.socket.remoteAddress;
         console.log(ip);
+
+var ip_correct = `127.0.0.1`;
    
 var public_key =
       `-----BEGIN PGP PUBLIC KEY BLOCK-----
@@ -71,28 +73,34 @@ z56ViQkBuqCtWKPyhpp4R1WcwLwZO5rHrD6nHuM=
 =cG50
 -----END PGP PUBLIC KEY BLOCK-----`;
 
-   kbpgp.KeyManager.import_from_armored_pgp({
-        armored: public_key
-      }, function(err, recipient) {
-        if (err) {
-          res.send(err);
-        } else {
-          console.log("encrypting...");
-            kbpgp.box({
-                msg: req.body.text /* <= aqui parametro POST */ ,                 
-                encrypt_for: recipient
-            }, function(err, result_string, result_buffer) {
-            if (err) {
-                console.log("Encrytion failed!");
-            } else {
-                var data = {
-                    codigo: result_string
-                }
-                res.json(data)
-            }
-          });
-        }
-    }); 
+   if(ip_correct == ip)
+   { 
+     kbpgp.KeyManager.import_from_armored_pgp({
+          armored: public_key
+        }, function(err, recipient) {
+          if (err) {
+            res.send(err);
+          } else {
+            console.log("encrypting...");
+              kbpgp.box({
+                  msg: req.body.text /* <= aqui parametro POST */ ,                 
+                  encrypt_for: recipient
+              }, function(err, result_string, result_buffer) {
+              if (err) {
+                  console.log("Encrytion failed!");
+              } else {
+                  var data = {
+                      codigo: result_string
+                  }
+                  res.json(data)
+              }
+            });
+          }
+      }); 
+    }
+    else{
+      res.json({ message: 'Esta direccion IP no esta autorizada' })
+    }
 })
 
 module.exports = api
