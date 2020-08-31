@@ -7,6 +7,12 @@ api.use(cors())
 
 
 api.post('/convert', (req, res) => {
+
+var ip = req.headers['x-forwarded-for'] || 
+        req.connection.remoteAddress || 
+        req.socket.remoteAddress ||
+        req.connection.socket.remoteAddress;
+        console.log(ip);
    
 var public_key =
       `-----BEGIN PGP PUBLIC KEY BLOCK-----
